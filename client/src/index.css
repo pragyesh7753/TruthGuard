@@ -602,3 +602,446 @@ body {
     z-index: 2;
   }
 }
+
+/* =============================================
+   DETECTOR PAGE
+   ============================================= */
+.detector-page {
+  padding: 2rem 1.5rem 4rem;
+}
+
+.detector-container {
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.detector-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.detector-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 0.5rem;
+}
+
+.detector-subtitle {
+  color: var(--color-slate-400);
+  font-size: 1rem;
+}
+
+/* ---- Input card ---- */
+.detector-input-card {
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.detector-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-slate-400);
+  margin-bottom: 0.75rem;
+}
+
+.detector-textarea {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-glass-border);
+  border-radius: 0.5rem;
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  resize: vertical;
+  transition: var(--transition-default);
+}
+
+.detector-textarea::placeholder {
+  color: var(--color-slate-600);
+}
+
+.detector-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent-500);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+}
+
+.detector-textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.detector-input-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.detector-char-count {
+  font-size: 0.8rem;
+  color: var(--color-slate-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.detector-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Disabled button state */
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---- Loading indicator ---- */
+.detector-loading {
+  padding: 3rem 2rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid var(--color-glass-border);
+  border-top-color: var(--color-accent-400);
+  border-radius: 50%;
+  margin: 0 auto 1.25rem;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 0.35rem;
+}
+
+.loading-subtext {
+  font-size: 0.85rem;
+  color: var(--color-slate-500);
+}
+
+/* Spin animation — also used on the button loader icon */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ---- Result card ---- */
+.detector-result {
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.result-verdict-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.75rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.result-verdict-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.result-verdict-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  margin-bottom: 0.15rem;
+}
+
+.result-verdict-text {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+/* Verdict color variants */
+.verdict-bg-fake {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--color-danger);
+  border-bottom: 1px solid rgba(248, 113, 113, 0.15);
+}
+
+.verdict-bg-real {
+  background: rgba(52, 211, 153, 0.1);
+  color: var(--color-success);
+  border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+}
+
+.verdict-bg-uncertain {
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--color-warning);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.15);
+}
+
+.verdict-fake {
+  color: var(--color-danger);
+}
+
+.verdict-real {
+  color: var(--color-success);
+}
+
+.verdict-uncertain {
+  color: var(--color-warning);
+}
+
+/* Confidence display */
+.result-confidence {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.result-confidence-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.result-confidence-label {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* Result sections (summary, indicators) */
+.result-section {
+  padding: 1.5rem 1.75rem;
+  border-top: 1px solid var(--color-glass-border);
+}
+
+.result-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-slate-400);
+  margin-bottom: 0.75rem;
+}
+
+.result-summary {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  line-height: 1.7;
+}
+
+/* Risk indicators */
+.result-indicators {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.indicator-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-glass-border);
+}
+
+.indicator-label {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.indicator-level {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 100px;
+}
+
+.level-high {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--color-danger);
+}
+
+.level-low {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--color-warning);
+}
+
+.level-medium {
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--color-accent-400);
+}
+
+/* Detector responsive */
+@media (max-width: 600px) {
+  .result-indicators {
+    grid-template-columns: 1fr;
+  }
+
+  .result-verdict-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* =============================================
+   DASHBOARD PAGE
+   ============================================= */
+.dashboard-page {
+  padding: 2rem 1.5rem 4rem;
+}
+
+.dashboard-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-subtitle {
+  color: var(--color-slate-400);
+  font-size: 1rem;
+}
+
+/* ---- Summary stat cards ---- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  padding: 1.25rem 1.5rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-slate-500);
+  margin-bottom: 0.4rem;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-change {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-success);
+  margin-top: 0.25rem;
+  display: inline-block;
+}
+
+/* ---- Charts grid ---- */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.chart-card {
+  padding: 1.5rem;
+}
+
+.chart-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chart-icon {
+  color: var(--color-accent-400);
+}
+
+.chart-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.chart-wrapper {
+  width: 100%;
+}
+
+/* Full-width chart variant */
+.chart-card-wide {
+  grid-column: 1 / -1;
+}
+
+/* ---- Custom Recharts tooltip ---- */
+.chart-tooltip {
+  background: var(--color-dark-600);
+  border: 1px solid var(--color-glass-border);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  box-shadow: var(--shadow-card);
+}
+
+.chart-tooltip-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 0.3rem;
+}
+
+.chart-tooltip-value {
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* ---- Dashboard responsive ---- */
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
