@@ -1,1 +1,604 @@
+/* ============================================
+   TruthGuard — Global Styles & Theme Config
+   TailwindCSS v4 (theme via @theme directive)
+   ============================================ */
+
 @import "tailwindcss";
+
+/* -----------------------------------------
+   Custom Theme Tokens
+   All design tokens live here for easy
+   maintenance and consistency.
+   ----------------------------------------- */
+@theme {
+  /* Font Family */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- Brand Colors ---- */
+
+  /* Primary palette — deep dark blues for backgrounds */
+  --color-dark-900: #050a18;
+  --color-dark-800: #0a0f1e;
+  --color-dark-700: #0f1729;
+  --color-dark-600: #141d34;
+  --color-dark-500: #1a2540;
+
+  /* Accent — cyan / teal for highlights & CTAs */
+  --color-accent-400: #22d3ee;
+  --color-accent-500: #06b6d4;
+  --color-accent-600: #0891b2;
+
+  /* Supporting — subtle tones for borders, muted text */
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+
+  /* Status colors — used in analysis results */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+
+  /* Glass effect token */
+  --color-glass: rgba(255, 255, 255, 0.05);
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+
+  /* ---- Shadows ---- */
+  --shadow-glow: 0 0 20px rgba(6, 182, 212, 0.15);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+
+  /* ---- Border Radius ---- */
+  --radius-card: 1rem;
+  --radius-button: 0.625rem;
+
+  /* ---- Transitions ---- */
+  --transition-default: all 0.25s ease;
+  --transition-slow: all 0.4s ease;
+}
+
+/* -----------------------------------------
+   Base Styles
+   Applied globally to set the dark theme
+   foundation and typography defaults.
+   ----------------------------------------- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-dark-800);
+  color: #e2e8f0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* -----------------------------------------
+   Utility Classes
+   Reusable patterns for glassmorphism,
+   gradients, and common card styles.
+   ----------------------------------------- */
+
+/* Glassmorphism card */
+.glass-card {
+  background: var(--color-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-default);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+/* Gradient background — used on page-level wrappers */
+.bg-gradient-dark {
+  background: linear-gradient(
+    135deg,
+    var(--color-dark-900) 0%,
+    var(--color-dark-800) 40%,
+    var(--color-dark-700) 100%
+  );
+}
+
+/* Accent gradient — buttons, highlights */
+.bg-gradient-accent {
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-400),
+    var(--color-accent-600)
+  );
+}
+
+/* Subtle text gradient for headings */
+.text-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-accent-400) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glow ring — used on focus states */
+.ring-glow {
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.3);
+}
+
+/* -----------------------------------------
+   Scrollbar (WebKit browsers)
+   Keeps the dark theme consistent.
+   ----------------------------------------- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-dark-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-slate-600);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-slate-500);
+}
+
+/* -----------------------------------------
+   Page Content
+   Offset for the fixed navbar height.
+   ----------------------------------------- */
+.page-content {
+  padding-top: 5rem;
+}
+
+/* -----------------------------------------
+   Navbar
+   Fixed top bar with glass effect.
+   ----------------------------------------- */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(10, 15, 30, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-glass-border);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Brand / Logo */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #f1f5f9;
+  font-weight: 700;
+  font-size: 1.25rem;
+  transition: var(--transition-default);
+}
+
+.navbar-brand:hover {
+  color: var(--color-accent-400);
+}
+
+.navbar-brand-text {
+  letter-spacing: -0.02em;
+}
+
+/* Desktop navigation links */
+.navbar-links {
+  display: none;
+  list-style: none;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: var(--color-slate-400);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-button);
+  transition: var(--transition-default);
+}
+
+.navbar-link:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.navbar-link-active {
+  color: var(--color-accent-400);
+  background: rgba(6, 182, 212, 0.1);
+}
+
+/* Mobile menu toggle button */
+.navbar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-slate-400);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-button);
+  transition: var(--transition-default);
+}
+
+.navbar-toggle:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Mobile dropdown menu */
+.navbar-mobile-menu {
+  list-style: none;
+  padding: 0.5rem 1.5rem 1rem;
+  border-top: 1px solid var(--color-glass-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.navbar-mobile-link {
+  display: block;
+  text-decoration: none;
+  color: var(--color-slate-400);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-button);
+  transition: var(--transition-default);
+}
+
+.navbar-mobile-link:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* -----------------------------------------
+   Responsive Breakpoints
+   ----------------------------------------- */
+@media (min-width: 768px) {
+  .navbar-links {
+    display: flex;
+  }
+
+  .navbar-toggle {
+    display: none;
+  }
+}
+
+/* =============================================
+   SHARED SECTION STYLES
+   ============================================= */
+.section {
+  padding: 5rem 1.5rem;
+}
+
+.section-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  color: #f1f5f9;
+  margin-bottom: 0.75rem;
+}
+
+.section-subtitle {
+  text-align: center;
+  color: var(--color-slate-400);
+  font-size: 1.05rem;
+  max-width: 550px;
+  margin: 0 auto 3rem;
+}
+
+/* =============================================
+   BUTTONS
+   ============================================= */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: linear-gradient(135deg, var(--color-accent-400), var(--color-accent-600));
+  color: var(--color-dark-900);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: var(--radius-button);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-default);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.3);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: transparent;
+  color: var(--color-slate-400);
+  font-weight: 500;
+  font-size: 0.95rem;
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-button);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-default);
+}
+
+.btn-secondary:hover {
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* =============================================
+   HOME PAGE
+   ============================================= */
+.home-page {
+  overflow-x: hidden;
+}
+
+/* ---- Hero Section ---- */
+.hero-section {
+  padding: 3rem 1.5rem 4rem;
+}
+
+.hero-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 100px;
+  color: var(--color-accent-400);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #f1f5f9;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-description {
+  color: var(--color-slate-400);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 520px;
+  margin-bottom: 2rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+/* Hero stats bar */
+.hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-accent-400);
+}
+
+.hero-stat-label {
+  font-size: 0.8rem;
+  color: var(--color-slate-500);
+  margin-top: 0.15rem;
+}
+
+.hero-stat-divider {
+  width: 1px;
+  height: 2.5rem;
+  background: var(--color-glass-border);
+}
+
+/* Hero illustration */
+.hero-illustration {
+  display: flex;
+  justify-content: center;
+}
+
+.hero-image-wrapper {
+  max-width: 480px;
+  width: 100%;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  border: 1px solid var(--color-glass-border);
+  box-shadow: var(--shadow-glow);
+}
+
+.hero-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---- Pipeline / How It Works ---- */
+.pipeline-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.pipeline-card {
+  position: relative;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.pipeline-step-number {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-slate-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.pipeline-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--color-accent-400);
+  margin-bottom: 1rem;
+}
+
+.pipeline-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 0.5rem;
+}
+
+.pipeline-card-description {
+  font-size: 0.9rem;
+  color: var(--color-slate-400);
+  line-height: 1.6;
+}
+
+/* Connector arrow — hidden on mobile, shown on desktop */
+.pipeline-connector {
+  display: none;
+}
+
+/* ---- Tech Stack ---- */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.tech-card {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.tech-card-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-accent-400);
+  margin-bottom: 0.35rem;
+}
+
+.tech-card-description {
+  font-size: 0.85rem;
+  color: var(--color-slate-400);
+}
+
+/* =============================================
+   HOME PAGE — RESPONSIVE
+   ============================================= */
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 3.25rem;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pipeline-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tech-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 3.5rem;
+  }
+
+  .pipeline-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .pipeline-connector {
+    display: flex;
+    position: absolute;
+    right: -1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-slate-600);
+    z-index: 2;
+  }
+}
