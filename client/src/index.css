@@ -107,21 +107,17 @@ body {
 
 /* Gradient background — used on page-level wrappers */
 .bg-gradient-dark {
-  background: linear-gradient(
-    135deg,
-    var(--color-dark-900) 0%,
-    var(--color-dark-800) 40%,
-    var(--color-dark-700) 100%
-  );
+  background: linear-gradient(135deg,
+      var(--color-dark-900) 0%,
+      var(--color-dark-800) 40%,
+      var(--color-dark-700) 100%);
 }
 
 /* Accent gradient — buttons, highlights */
 .bg-gradient-accent {
-  background: linear-gradient(
-    135deg,
-    var(--color-accent-400),
-    var(--color-accent-600)
-  );
+  background: linear-gradient(135deg,
+      var(--color-accent-400),
+      var(--color-accent-600));
 }
 
 /* Subtle text gradient for headings */
@@ -414,7 +410,8 @@ body {
   color: #f1f5f9;
   margin-bottom: 1.25rem;
   letter-spacing: -0.02em;
-  min-height: 3.1em; /* prevent layout shift during typing */
+  min-height: 3.1em;
+  /* prevent layout shift during typing */
 }
 
 /* Typewriter blinking cursor */
@@ -427,8 +424,15 @@ body {
 }
 
 @keyframes cursorBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
 }
 
 .hero-description {
@@ -683,8 +687,21 @@ body {
 
 .detector-textarea:focus {
   outline: none;
-  border-color: var(--color-accent-500);
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+  border-color: var(--color-accent-400);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2), 0 0 20px rgba(6, 182, 212, 0.1);
+  animation: textareaGlow 2s ease-in-out infinite;
+}
+
+@keyframes textareaGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2), 0 0 20px rgba(6, 182, 212, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.3), 0 0 30px rgba(6, 182, 212, 0.15);
+  }
 }
 
 .detector-textarea:disabled {
@@ -924,6 +941,128 @@ body {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* ---- CSS Scanner animation (replaces Lottie) ---- */
+.scanner-rings {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 1.25rem;
+}
+
+.scanner-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent-400);
+  transform: translate(-50%, -50%);
+  animation: scannerPulse 2s ease-in-out infinite;
+}
+
+.scanner-ring-1 {
+  width: 80px;
+  height: 80px;
+  opacity: 0.3;
+  animation-delay: 0s;
+}
+
+.scanner-ring-2 {
+  width: 55px;
+  height: 55px;
+  opacity: 0.5;
+  animation-delay: 0.3s;
+}
+
+.scanner-ring-3 {
+  width: 30px;
+  height: 30px;
+  opacity: 0.7;
+  animation-delay: 0.6s;
+}
+
+.scanner-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--color-accent-400);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: scannerDotPulse 1s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+}
+
+@keyframes scannerPulse {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.3;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+@keyframes scannerDotPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+  }
+
+  50% {
+    opacity: 0.4;
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.9);
+  }
+}
+
+/* ---- Confidence bar ---- */
+.confidence-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.confidence-bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.confidence-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+}
+
+.bar-fill-fake {
+  background: linear-gradient(90deg, var(--color-danger), #ef4444);
+  box-shadow: 0 0 10px rgba(248, 113, 113, 0.3);
+}
+
+.bar-fill-real {
+  background: linear-gradient(90deg, var(--color-success), #10b981);
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
+}
+
+.bar-fill-uncertain {
+  background: linear-gradient(90deg, var(--color-warning), #f59e0b);
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+}
+
+.confidence-bar-label {
+  font-size: 0.8rem;
+  color: var(--color-slate-400);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 /* =============================================
