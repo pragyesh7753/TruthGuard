@@ -1,0 +1,53 @@
+import pandas as pd
+import re
+import pickle
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+# Load dataset
+fake = pd.read_csv("dataset/Fake.csv")
+true = pd.read_csv("dataset/True.csv")
+
+fake["label"] = 1
+true["label"] = 0
+
+data = pd.concat([fake, true])
+
+# Clean text
+stop_words = set(stopwords.words("english"))
+
+def clean_text(text):
+    text = re.sub("[^a-zA-Z]", " ", str(text))
+    text = text.lower()
+    words = text.split()
+    words = [w for w in words if w not in stop_words]
+    return " ".join(words)
+
+data["clean_text"] = data["text"].apply(clean_text)
+
+# Vectorization
+vectorizer = TfidfVectorizer(max_features=5000)
+X = vectorizer.fit_transform(data["clean_text"])
+y = data["label"]
+
+# Train test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+# Accuracy
+pred = model.predict(X_test)
+print("Accuracy:", accuracy_score(y_test, pred))
+
+# Save model
+pickle.dump(model, open("app/models/model.pkl", "wb"))
+pickle.dump(vectorizer, open("app/models/vectorizer.pkl", "wb"))
+
+print("Model saved successfully!")
