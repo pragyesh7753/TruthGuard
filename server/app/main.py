@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import predict
+from app.routes import analytics
 
 app = FastAPI()
 
@@ -15,6 +16,7 @@ app.add_middleware(
 
 # Routes
 app.include_router(predict.router)
+app.include_router(analytics.router)
 
 
 @app.get("/")
