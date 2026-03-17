@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   ShieldCheck,
@@ -8,6 +9,92 @@ import {
   ArrowRight,
   ChevronRight,
 } from "lucide-react";
+
+/* =========================================
+   Typewriter Hook — loops forever
+   ========================================= */
+const TYPEWRITER_FULL_TEXT = "AI-Powered Fake News Detection";
+const TYPING_SPEED = 80;   // ms per character (typing)
+const ERASING_SPEED = 40;  // ms per character (erasing — faster)
+const PAUSE_AFTER_TYPING = 1500; // ms to hold before erasing
+const PAUSE_AFTER_ERASING = 500; // ms to hold before re-typing
+
+function useTypewriter(text, typingSpeed, erasingSpeed) {
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    let charIndex = 0;
+    let isErasing = false;
+    let timeout;
+
+    function tick() {
+      if (!isErasing) {
+        // Typing forward
+        charIndex++;
+        setDisplayedText(text.slice(0, charIndex));
+        if (charIndex >= text.length) {
+          // Finished typing → pause, then start erasing
+          isErasing = true;
+          timeout = setTimeout(tick, PAUSE_AFTER_TYPING);
+        } else {
+          timeout = setTimeout(tick, typingSpeed);
+        }
+      } else {
+        // Erasing backward
+        charIndex--;
+        setDisplayedText(text.slice(0, charIndex));
+        if (charIndex <= 0) {
+          // Finished erasing → pause, then start typing again
+          isErasing = false;
+          timeout = setTimeout(tick, PAUSE_AFTER_ERASING);
+        } else {
+          timeout = setTimeout(tick, erasingSpeed);
+        }
+      }
+    }
+
+    timeout = setTimeout(tick, typingSpeed);
+    return () => clearTimeout(timeout);
+  }, [text, typingSpeed, erasingSpeed]);
+
+  return { displayedText };
+}
+
+/* =========================================
+   Render typed text with gradient on "Fake News"
+   ========================================= */
+function renderTypedTitle(text) {
+  const gradientStart = TYPEWRITER_FULL_TEXT.indexOf("Fake News");
+  const gradientEnd = gradientStart + "Fake News".length;
+
+  // Split the currently displayed text into three parts
+  if (text.length <= gradientStart) {
+    // Haven't reached "Fake News" yet
+    return <>{text}</>;
+  } else if (text.length <= gradientEnd) {
+    // Partially or fully inside "Fake News"
+    const before = text.slice(0, gradientStart);
+    const gradientPart = text.slice(gradientStart);
+    return (
+      <>
+        {before}
+        <span className="text-gradient">{gradientPart}</span>
+      </>
+    );
+  } else {
+    // Past "Fake News"
+    const before = text.slice(0, gradientStart);
+    const gradientPart = text.slice(gradientStart, gradientEnd);
+    const after = text.slice(gradientEnd);
+    return (
+      <>
+        {before}
+        <span className="text-gradient">{gradientPart}</span>
+        {after}
+      </>
+    );
+  }
+}
 
 /* =========================================
    How It Works — pipeline steps
@@ -64,6 +151,12 @@ function Home() {
    Hero Section
    ----------------------------------------- */
 function HeroSection() {
+  const { displayedText } = useTypewriter(
+    TYPEWRITER_FULL_TEXT,
+    TYPING_SPEED,
+    ERASING_SPEED
+  );
+
   return (
     <section className="hero-section">
       <div className="hero-grid">
@@ -75,9 +168,8 @@ function HeroSection() {
           </div>
 
           <h1 className="hero-title">
-            AI-Powered{" "}
-            <span className="text-gradient">Fake News</span>{" "}
-            Detection
+            {renderTypedTitle(displayedText)}
+            <span className="typewriter-cursor">|</span>
           </h1>
 
           <p className="hero-description">

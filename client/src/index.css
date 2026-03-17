@@ -414,6 +414,21 @@ body {
   color: #f1f5f9;
   margin-bottom: 1.25rem;
   letter-spacing: -0.02em;
+  min-height: 3.1em; /* prevent layout shift during typing */
+}
+
+/* Typewriter blinking cursor */
+.typewriter-cursor {
+  display: inline-block;
+  color: var(--color-accent-400);
+  font-weight: 300;
+  animation: cursorBlink 0.53s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 .hero-description {
