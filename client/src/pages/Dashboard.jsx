@@ -48,10 +48,24 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const loadAnalytics = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await fetchAnalytics();
+      setAnalytics(data);
+    } catch (err) {
+      setError(err?.message || "Failed to load analytics");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     let active = true;
 
-    async function loadAnalytics() {
+    async function initLoad() {
       setLoading(true);
       setError("");
 
@@ -67,7 +81,7 @@ function Dashboard() {
       }
     }
 
-    loadAnalytics();
+    initLoad();
     return () => {
       active = false;
     };
@@ -116,6 +130,11 @@ function Dashboard() {
           <p className="dashboard-subtitle">
             Live dataset analytics from the backend pipeline.
           </p>
+          <div style={{ marginTop: "1rem" }}>
+            <button className="btn-secondary" type="button" onClick={loadAnalytics} disabled={loading}>
+              {loading ? "Refreshing..." : "Refresh"}
+            </button>
+          </div>
         </div>
 
         {/* Summary stat cards */}
