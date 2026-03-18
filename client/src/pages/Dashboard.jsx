@@ -1,11 +1,10 @@
+import { useEffect, useMemo, useState } from "react";
 import {
   PieChart,
   Pie,
   Cell,
   BarChart,
   Bar,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -13,51 +12,14 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { BarChart3, TrendingUp, PieChart as PieIcon } from "lucide-react";
-
-
-
-/** Fake vs Real distribution for pie chart */
-const DISTRIBUTION_DATA = [
-  { name: "Fake News", value: 42 },
-  { name: "Real News", value: 58 },
-];
+import { BarChart3, PieChart as PieIcon } from "lucide-react";
+import { fetchAnalytics } from "../services/api";
 
 const PIE_COLORS = ["#f87171", "#34d399"];
 
-/** Top fake news topics for bar chart */
-const TOPICS_DATA = [
-  { topic: "Politics", count: 340 },
-  { topic: "Health", count: 280 },
-  { topic: "Science", count: 190 },
-  { topic: "Finance", count: 150 },
-  { topic: "Tech", count: 120 },
-  { topic: "Climate", count: 95 },
-];
-
-/** Monthly trend for line chart */
-const TREND_DATA = [
-  { month: "Jan", fake: 120, real: 200 },
-  { month: "Feb", fake: 150, real: 210 },
-  { month: "Mar", fake: 180, real: 190 },
-  { month: "Apr", fake: 140, real: 230 },
-  { month: "May", fake: 200, real: 220 },
-  { month: "Jun", fake: 250, real: 240 },
-  { month: "Jul", fake: 210, real: 260 },
-  { month: "Aug", fake: 190, real: 250 },
-  { month: "Sep", fake: 230, real: 270 },
-  { month: "Oct", fake: 260, real: 280 },
-  { month: "Nov", fake: 220, real: 290 },
-  { month: "Dec", fake: 240, real: 310 },
-];
-
-/** Summary metric cards */
-const STATS = [
-  { label: "Total Analyzed", value: "12,847", change: "+12%" },
-  { label: "Fake Detected", value: "5,396", change: "+8%" },
-  { label: "Accuracy Rate", value: "96.2%", change: "+0.5%" },
-  { label: "Avg. Response", value: "1.4s", change: "-0.2s" },
-];
+function formatNumber(value) {
+  return new Intl.NumberFormat("en-US").format(Number(value) || 0);
+}
 
 /* =========================================
    Custom Tooltip
@@ -82,6 +44,67 @@ function CustomTooltip({ active, payload, label }) {
    Dashboard Page
    ========================================= */
 function Dashboard() {
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadAnalytics() {
+      setLoading(true);
+      setError("");
+
+      try {
+        const data = await fetchAnalytics();
+        if (!active) return;
+        setAnalytics(data);
+      } catch (err) {
+        if (!active) return;
+        setError(err?.message || "Failed to load analytics");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadAnalytics();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const fakeCount = Number(analytics?.fake_vs_real?.fake || 0);
+  const realCount = Number(analytics?.fake_vs_real?.real || 0);
+  const totalCount = fakeCount + realCount;
+
+  const distributionData = useMemo(
+    () => [
+      { name: "Fake News", value: fakeCount },
+      { name: "Real News", value: realCount },
+    ],
+    [fakeCount, realCount]
+  );
+
+  const topicsData = useMemo(() => {
+    const items = Array.isArray(analytics?.top_topics) ? analytics.top_topics : [];
+    return items.map((item) => ({
+      topic: item.topic,
+      count: Number(item.count || 0),
+    }));
+  }, [analytics]);
+
+  const stats = useMemo(() => {
+    const fakeShare = totalCount > 0 ? ((fakeCount / totalCount) * 100).toFixed(1) : "0.0";
+    const realShare = totalCount > 0 ? ((realCount / totalCount) * 100).toFixed(1) : "0.0";
+
+    return [
+      { label: "Total Analyzed", value: formatNumber(totalCount) },
+      { label: "Fake Articles", value: formatNumber(fakeCount) },
+      { label: "Real Articles", value: formatNumber(realCount) },
+      { label: "Fake Share", value: `${fakeShare}% (Real ${realShare}%)` },
+    ];
+  }, [fakeCount, realCount, totalCount]);
+
   return (
     <div className="dashboard-page">
       <div className="dashboard-container">
@@ -91,23 +114,34 @@ function Dashboard() {
             Analytics <span className="text-gradient">Dashboard</span>
           </h1>
           <p className="dashboard-subtitle">
-            Overview of fake news detection metrics and trends.
+            Live dataset analytics from the backend pipeline.
           </p>
         </div>
 
         {/* Summary stat cards */}
         <div className="stats-grid">
-          {STATS.map((stat) => (
+          {stats.map((stat) => (
             <div key={stat.label} className="stat-card glass-card">
               <p className="stat-label">{stat.label}</p>
               <p className="stat-value">{stat.value}</p>
-              <span className="stat-change">{stat.change}</span>
             </div>
           ))}
         </div>
 
+        {loading && (
+          <div className="chart-card chart-card-wide glass-card">
+            <p className="dashboard-subtitle">Loading analytics...</p>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="chart-card chart-card-wide glass-card">
+            <p className="dashboard-subtitle">Unable to load analytics: {error}</p>
+          </div>
+        )}
+
         {/* Charts grid */}
-        <div className="charts-grid">
+        {!loading && !error && <div className="charts-grid">
           {/* Pie chart — Fake vs Real distribution */}
           <div className="chart-card glass-card">
             <div className="chart-card-header">
@@ -119,7 +153,7 @@ function Dashboard() {
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
-                    data={DISTRIBUTION_DATA}
+                    data={distributionData}
                     cx="50%"
                     cy="50%"
                     innerRadius={65}
@@ -128,7 +162,7 @@ function Dashboard() {
                     dataKey="value"
                     stroke="none"
                   >
-                    {DISTRIBUTION_DATA.map((entry, index) => (
+                    {distributionData.map((entry, index) => (
                       <Cell
                         key={entry.name}
                         fill={PIE_COLORS[index]}
@@ -150,16 +184,16 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Bar chart — Top fake news topics */}
+          {/* Bar chart — Top topics */}
           <div className="chart-card glass-card">
             <div className="chart-card-header">
               <BarChart3 size={18} className="chart-icon" />
-              <h2 className="chart-card-title">Top Fake News Topics</h2>
+              <h2 className="chart-card-title">Top Topics</h2>
             </div>
 
             <div className="chart-wrapper">
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={TOPICS_DATA} barSize={32}>
+                <BarChart data={topicsData} barSize={32}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                   <XAxis
                     dataKey="topic"
@@ -175,7 +209,7 @@ function Dashboard() {
                   <Tooltip content={<CustomTooltip />} />
                   <Bar
                     dataKey="count"
-                    name="Fake Articles"
+                    name="Articles"
                     fill="#f87171"
                     radius={[4, 4, 0, 0]}
                   />
@@ -183,63 +217,7 @@ function Dashboard() {
               </ResponsiveContainer>
             </div>
           </div>
-
-          {/* Line chart — Monthly trend (full width) */}
-          <div className="chart-card chart-card-wide glass-card">
-            <div className="chart-card-header">
-              <TrendingUp size={18} className="chart-icon" />
-              <h2 className="chart-card-title">Fake News Trend Over Time</h2>
-            </div>
-
-            <div className="chart-wrapper">
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={TREND_DATA}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                  <XAxis
-                    dataKey="month"
-                    tick={{ fill: "#64748b", fontSize: 12 }}
-                    axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fill: "#64748b", fontSize: 12 }}
-                    axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
-                    tickLine={false}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend
-                    verticalAlign="top"
-                    align="right"
-                    iconType="circle"
-                    formatter={(value) => (
-                      <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>
-                        {value}
-                      </span>
-                    )}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="fake"
-                    name="Fake News"
-                    stroke="#f87171"
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: "#f87171" }}
-                    activeDot={{ r: 5 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="real"
-                    name="Real News"
-                    stroke="#34d399"
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: "#34d399" }}
-                    activeDot={{ r: 5 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+        </div>}
       </div>
     </div>
   );

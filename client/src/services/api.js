@@ -1,5 +1,17 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL;
+const RAW_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+function resolveApiBaseUrl() {
+  const fallback = "http://localhost:8000";
+
+  // Handle missing or malformed env values that can produce URLs like "undefined/predict".
+  if (!RAW_API_BASE_URL || RAW_API_BASE_URL === "undefined" || RAW_API_BASE_URL === "null") {
+    return fallback;
+  }
+
+  return RAW_API_BASE_URL.replace(/\/+$/, "");
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const DEBUG = true;
 
@@ -52,4 +64,8 @@ export async function predictNews(newsText) {
     method: "POST",
     body: JSON.stringify({ news: newsText }),
   });
+}
+
+export async function fetchAnalytics() {
+  return apiRequest("/analytics");
 }
