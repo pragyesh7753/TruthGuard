@@ -15,11 +15,7 @@ import {
 } from "recharts";
 import { BarChart3, TrendingUp, PieChart as PieIcon } from "lucide-react";
 
-/* =========================================
-   Mock Data
-   Replace with real API data when backend
-   is connected.
-   ========================================= */
+
 
 /** Fake vs Real distribution for pie chart */
 const DISTRIBUTION_DATA = [

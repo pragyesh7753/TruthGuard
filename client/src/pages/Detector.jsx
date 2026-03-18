@@ -8,18 +8,13 @@ import {
   BarChart3,
   Clock,
   FileText,
+  Zap,
+  Eye,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
+import { predictNews } from "../services/api";
 
-/* =========================================
-   Detector Page
-
-   UI-only fake news detector interface.
-   Simulates: idle → loading → result flow.
-   Enhanced with Framer Motion animations,
-   Lottie loading, and toast notifications.
-   ========================================= */
 
 const STATUS = {
   IDLE: "idle",
@@ -27,19 +22,38 @@ const STATUS = {
   RESULT: "result",
 };
 
-const MOCK_RESULT = {
-  verdict: "Likely Fake",
-  confidence: 87,
-  label: "fake",
-  summary:
-    "The article contains several misleading claims, emotionally charged language, and references unverified sources. Our AI model detected patterns commonly associated with fabricated news.",
-  indicators: [
-    { label: "Sensational Language", level: "high" },
-    { label: "Source Credibility", level: "low" },
-    { label: "Factual Consistency", level: "low" },
-    { label: "Emotional Manipulation", level: "high" },
-  ],
-};
+const DEFAULT_INDICATORS = [
+  { label: "Sensational Language", level: "medium" },
+  { label: "Source Credibility", level: "medium" },
+  { label: "Factual Consistency", level: "medium" },
+  { label: "Emotional Manipulation", level: "medium" },
+];
+
+function getConfidencePercent(value) {
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) return 0;
+  return numeric <= 1 ? Math.round(numeric * 100) : Math.round(numeric);
+}
+
+function buildResult(prediction, confidence, importantFeatures = [], cleanedText = "", realProb = 0, fakeProb = 0) {
+  const label = prediction === 0 ? "real" : "fake";
+  const confidencePercent = getConfidencePercent(confidence);
+
+  return {
+    verdict: label === "real" ? "Likely Real" : "Likely Fake",
+    confidence: confidencePercent,
+    label,
+    summary:
+      label === "real"
+        ? "The model found the content consistent with credible reporting patterns and factual language."
+        : "The model detected patterns commonly associated with fabricated or misleading content.",
+    indicators: DEFAULT_INDICATORS,
+    importantFeatures: importantFeatures || [],
+    cleanedText: cleanedText || "",
+    realProb: getConfidencePercent(realProb),
+    fakeProb: getConfidencePercent(fakeProb),
+  };
+}
 
 /* =========================================
    Framer Motion variants
@@ -91,18 +105,59 @@ function Detector() {
   const [status, setStatus] = useState(STATUS.IDLE);
   const [result, setResult] = useState(null);
 
-  const handleAnalyze = () => {
-    if (!newsText.trim()) return;
+  const handleAnalyze = async () => {
+    if (!newsText.trim()) {
+      toast.warning("⚠️ Please enter some text to analyze.", { autoClose: 2000 });
+      return;
+    }
+    if (status === STATUS.LOADING) return;
 
     setStatus(STATUS.LOADING);
     setResult(null);
-    try { toast.info("🔍 Analyzing article...", { autoClose: 2000 }); } catch(e) {}
+    console.log("[Detector] Starting analysis with text length:", newsText.trim().length);
+    
+    try {
+      toast.info("🔍 Analyzing article...", { autoClose: 2000 });
+    } catch (e) {}
 
-    setTimeout(() => {
-      setResult(MOCK_RESULT);
+    try {
+      console.log("[Detector] Calling predictNews API...");
+      const data = await predictNews(newsText.trim());
+      console.log("[Detector] API Response:", data);
+      
+      const prediction = Number(data?.prediction);
+      const confidence = Number(data?.confidence);
+      const importantFeatures = data?.important_features || [];
+      const cleanedText = data?.cleaned_text || "";
+      const realProb = Number(data?.real_probability || 0);
+      const fakeProb = Number(data?.fake_probability || 0);
+      
+      console.log("[Detector] Parsed -> prediction:", prediction, "confidence:", confidence);
+      console.log("[Detector] Important features:", importantFeatures);
+      
+      if (Number.isNaN(prediction)) {
+        throw new Error("Invalid prediction value from server");
+      }
+      
+      const nextResult = buildResult(prediction, confidence, importantFeatures, cleanedText, realProb, fakeProb);
+      console.log("[Detector] Built result:", nextResult);
+
+      setResult(nextResult);
       setStatus(STATUS.RESULT);
-      try { toast.success("✅ Analysis complete!", { autoClose: 3000 }); } catch(e) {}
-    }, 2500);
+      try {
+        toast.success("✅ Analysis complete!", { autoClose: 3000 });
+      } catch (e) {}
+    } catch (error) {
+      console.error("[Detector] Error during analysis:", error);
+      setStatus(STATUS.IDLE);
+      setResult(null);
+      try {
+        const errorMsg = error?.message || "Failed to analyze the article. Please check if the backend is running.";
+        toast.error(errorMsg, {
+          autoClose: 4000,
+        });
+      } catch (e) {}
+    }
   };
 
   const handleReset = () => {
@@ -292,7 +347,6 @@ function ResultCard({ result }) {
       barClass: "bar-fill-uncertain",
     },
   };
-
   const config = verdictConfig[result.label] || verdictConfig.uncertain;
   const VerdictIcon = config.icon;
 
@@ -372,6 +426,111 @@ function ResultCard({ result }) {
           ))}
         </div>
       </motion.div>
+
+      {/* Probability breakdown */}
+      <motion.div
+        className="result-section"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: 0.8 }}
+      >
+        <h3 className="result-section-title">
+          <BarChart3 size={16} />
+          Probability Analysis
+        </h3>
+        <div className="probability-breakdown">
+          <div className="prob-item real">
+            <div className="prob-label">Real</div>
+            <div className="prob-bar-container">
+              <motion.div
+                className="prob-bar real-bar"
+                initial={{ width: "0%" }}
+                animate={{ width: `${result.realProb}%` }}
+                transition={{ duration: 1, delay: 0.9 }}
+              />
+            </div>
+            <div className="prob-value">{result.realProb}%</div>
+          </div>
+          <div className="prob-item fake">
+            <div className="prob-label">Fake</div>
+            <div className="prob-bar-container">
+              <motion.div
+                className="prob-bar fake-bar"
+                initial={{ width: "0%" }}
+                animate={{ width: `${result.fakeProb}%` }}
+                transition={{ duration: 1, delay: 0.9 }}
+              />
+            </div>
+            <div className="prob-value">{result.fakeProb}%</div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Important features that influenced prediction */}
+      {result.importantFeatures && result.importantFeatures.length > 0 && (
+        <motion.div
+          className="result-section"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 1.0 }}
+        >
+          <h3 className="result-section-title">
+            <Zap size={16} />
+            Key Words Influencing Prediction
+          </h3>
+          <div className="features-list">
+            {result.importantFeatures.map((feature, i) => (
+              <motion.div
+                key={i}
+                className="feature-item"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 1.1 + i * 0.08 }}
+              >
+                <span className="feature-word">"{feature.word}"</span>
+                <span className={`feature-impact ${feature.impact}`}>
+                  {feature.impact === "increases_fake" ? "Suggests Fake" : "Suggests Real"}
+                </span>
+                <div className="feature-importance">
+                  <div className="feature-bar-container">
+                    <motion.div
+                      className="feature-bar"
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${Math.min(feature.importance * 100, 100)}%` }}
+                      transition={{ duration: 0.8, delay: 1.2 + i * 0.08 }}
+                    />
+                  </div>
+                  <span className="feature-score">
+                    {(feature.importance).toFixed(2)}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Cleaned text preview */}
+      {result.cleanedText && (
+        <motion.div
+          className="result-section"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, delay: 1.3 }}
+        >
+          <h3 className="result-section-title">
+            <Eye size={16} />
+            Processed Text (Cleaned)
+          </h3>
+          <div className="cleaned-text-preview">
+            {result.cleanedText.substring(0, 400)}
+            {result.cleanedText.length > 400 ? "..." : ""}
+          </div>
+          <p className="cleaned-text-note">
+            This is how the model sees your text after removing stopwords and special characters.
+          </p>
+        </motion.div>
+      )}
     </div>
   );
 }
