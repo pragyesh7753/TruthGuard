@@ -1,23 +1,38 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit
 
+# Global variables (to avoid re-creating Spark session & data)
+spark = None
+df = None
+
+
 def get_spark_session():
-    spark = SparkSession.builder \
-        .appName("TruthGuardAnalytics") \
-        .getOrCreate()
+    global spark
+    if spark is None:
+        spark = SparkSession.builder \
+            .appName("TruthGuardAnalytics") \
+            .master("local[*]") \
+            .config("spark.driver.host", "127.0.0.1") \
+            .config("spark.ui.enabled", "false") \
+            .getOrCreate()
     return spark
 
 
 def load_data():
-    spark = get_spark_session()
+    global df
+    if df is None:
+        spark = get_spark_session()
 
-    fake = spark.read.csv("dataset/Fake.csv", header=True, inferSchema=True)
-    true = spark.read.csv("dataset/True.csv", header=True, inferSchema=True)
+        # Load datasets
+        fake = spark.read.csv("dataset/Fake.csv", header=True, inferSchema=True)
+        true = spark.read.csv("dataset/True.csv", header=True, inferSchema=True)
 
-    fake = fake.withColumn("label", lit(1))
-    true = true.withColumn("label", lit(0))
+        # Add labels
+        fake = fake.withColumn("label", lit(1))
+        true = true.withColumn("label", lit(0))
 
-    df = fake.union(true)
+        # Combine datasets
+        df = fake.union(true)
 
     return df
 
@@ -58,7 +73,6 @@ def get_top_topics():
 
 
 def run_spark_analysis():
-    """Run all analytics and return combined results"""
     return {
         "fake_vs_real": get_fake_vs_real_count(),
         "top_topics": get_top_topics()
